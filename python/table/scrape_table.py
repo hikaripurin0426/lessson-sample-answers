@@ -1,6 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 import csv
+import os
 
 URL = "https://scraping-practice-six.vercel.app/table"
 
@@ -50,6 +51,17 @@ def scrape_price_comparison(soup):
 
 def scrape_product_name_price_to_csv(soup, filename="product_name_price.csv"):
     """商品テーブルから商品名と価格を抽出してCSVに保存する"""
+    
+    # output フォルダを作成
+    output_folder = "output"
+    if not os.path.exists(output_folder):
+        os.makedirs(output_folder)
+        print(f"✓ フォルダ作成: {output_folder}")
+    
+    # ファイルパスをoutput配下に設定
+    full_filename = os.path.join(output_folder, filename)
+    # full_filenameはoutput/product_name_price.csv になります
+
     table = soup.find('table', id='product-table')
     if not table:
         print("商品テーブルが見つかりません")
@@ -67,11 +79,11 @@ def scrape_product_name_price_to_csv(soup, filename="product_name_price.csv"):
         print("商品名と価格のデータが見つかりませんでした")
         return
     try:
-        with open(filename, 'w', newline='', encoding='utf-8') as f:
+        with open(full_filename, 'w', newline='', encoding='utf-8') as f:
             writer = csv.writer(f)
             writer.writerow(["商品名", "価格"])
             writer.writerows(data_list)
-        print(f"商品名と価格をCSVに保存しました: {filename}")
+        print(f"商品名と価格をCSVに保存しました: {full_filename}")
     except Exception as e:
         print(f"CSV保存に失敗しました: {e}")
 

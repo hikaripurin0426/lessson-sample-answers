@@ -12,23 +12,17 @@ import requests
 from bs4 import BeautifulSoup
 import csv
 import os
-from urllib.parse import urljoin, urlparse
+from urllib.parse import urljoin
 
 def scrape_images():
     """画像を取得してCSVに保存、ローカルにダウンロードする"""
     
     # スクレイピング対象のURL
-    url = "https://scraping-practice-six.vercel.app/basic"
-    
-    print("=" * 50)
-    print("画像スクレイピング開始")
-    print(f"対象URL: {url}")
-    print("=" * 50)
+    URL = "https://scraping-practice-six.vercel.app/basic"
     
     # 1. Webページを取得
-    print("1. Webページを取得中...")
     try:
-        response = requests.get(url)
+        response = requests.get(URL)
         response.raise_for_status()  # エラーがあれば例外を発生
         print("✓ ページ取得成功")
     except Exception as e:
@@ -36,12 +30,10 @@ def scrape_images():
         return
     
     # 2. BeautifulSoupでHTMLを解析
-    print("2. HTMLを解析中...")
     soup = BeautifulSoup(response.content, 'html.parser')
     print("✓ HTML解析完了")
     
     # 3. 全ての画像タグを検索
-    print("3. 画像を検索中...")
     images = soup.find_all('img')
     print(f"✓ {len(images)}個の画像を発見")
     
@@ -52,10 +44,11 @@ def scrape_images():
         src = img.get('src')
         if src:
             # 相対URLを絶対URLに変換
-            full_url = urljoin(url, src)
-            
-            # alt属性（画像の説明文）を取得
-            alt = img.get('alt', '説明なし')
+            # src = "/sample1.jpeg"
+            # URL = "https://scraping-practice-six.vercel.app/basic"
+            # full_urlの中身はhttps://scraping-practice-six.vercel.app/basic/image1.jpgのようになります
+            full_url = urljoin(URL, src)
+
             
             # 画像のファイル名を生成
             filename = f"image_{i}.jpg"
@@ -64,20 +57,29 @@ def scrape_images():
             image_data = {
                 '番号': i,
                 '画像URL': full_url,
-                'alt属性': alt,
                 'ファイル名': filename
             }
             image_list.append(image_data)
             
-            print(f"  画像{i}: {alt} -> {full_url}")
     
     # 5. CSVファイルに保存
     print("\n4. CSVファイルに保存中...")
-    csv_filename = "images.csv"
+    
+    # output フォルダを作成
+    output_folder = "output"
+    if not os.path.exists(output_folder):
+        os.makedirs(output_folder)
+        print(f"✓ フォルダ作成: {output_folder}")
+    
+    csv_filename = os.path.join(output_folder, "images.csv")
+    # csv_filenameの中身は"output/images.csv"になります
     try:
+        # CSVファイルを書き込みモードで開く
         with open(csv_filename, 'w', newline='', encoding='utf-8') as csvfile:
             # CSVの列名を定義
-            fieldnames = ['番号', '画像URL', 'alt属性', 'ファイル名']
+            # csv.DictWriter は辞書のキーと fieldnames を照合してCSVの列に書き込むためのです。
+            # image_dataのキーとfieldnamesが一致している必要があります。
+            fieldnames = ['番号', '画像URL', 'ファイル名']
             writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
             
             # ヘッダー行を書き込み
@@ -94,7 +96,7 @@ def scrape_images():
     
     # 6. 画像ダウンロード用フォルダを作成
     print("\n5. 画像をダウンロード中...")
-    download_folder = "downloaded_images"
+    download_folder = os.path.join(output_folder, "downloaded_images")
     
     # フォルダが存在しない場合は作成
     if not os.path.exists(download_folder):
@@ -102,12 +104,10 @@ def scrape_images():
         print(f"✓ フォルダ作成: {download_folder}")
     
     # 7. 各画像をダウンロード
-    success_count = 0
     for image_data in image_list:
         try:
             # 画像URLからデータを取得
             img_response = requests.get(image_data['画像URL'])
-            img_response.raise_for_status()
             
             # ファイルパスを作成
             file_path = os.path.join(download_folder, image_data['ファイル名'])
@@ -116,18 +116,14 @@ def scrape_images():
             with open(file_path, 'wb') as f:
                 f.write(img_response.content)
             
-            print(f"  ✓ ダウンロード成功: {image_data['ファイル名']}")
-            success_count += 1
-            
         except Exception as e:
             print(f"  ✗ ダウンロード失敗: {image_data['ファイル名']} - {e}")
+    print(f"✓ 画像ファイル保存完了")
     
     # 8. 結果を表示
     print("\n" + "=" * 50)
     print("画像スクレイピング完了")
     print("=" * 50)
-    print(f"発見した画像数: {len(image_list)}個")
-    print(f"ダウンロード成功: {success_count}個")
     print(f"CSVファイル: {csv_filename}")
     print(f"画像フォルダ: {download_folder}")
     print("=" * 50)

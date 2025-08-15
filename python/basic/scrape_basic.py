@@ -85,28 +85,6 @@ def scrape_decorative(soup):
                 print(f"     - {element.get_text(strip=True)}")
     print()
 
-def scrape_quotes(soup):
-    print("10. 引用要素:")
-    blockquotes = soup.find_all('blockquote')
-    for i, quote in enumerate(blockquotes, 1):
-        quote_text = quote.get_text(strip=True)
-        print(f"   引用{i}: {quote_text}")
-    quotes = soup.find_all('q')
-    for i, quote in enumerate(quotes, 1):
-        quote_text = quote.get_text(strip=True)
-        print(f"   短い引用{i}: {quote_text}")
-    print()
-
-def scrape_footer(soup):
-    print("12. フッター情報:")
-    footer = soup.find('footer')
-    if footer:
-        footer_title = footer.find('h3')
-        if footer_title:
-            print(f"   フッタータイトル: {footer_title.get_text(strip=True)}")
-        code_blocks = footer.find_all('pre')
-        print(f"   コードブロック数: {len(code_blocks)}")
-    print()
 
 def main():
     
@@ -119,8 +97,6 @@ def main():
         ("セクション別情報", scrape_sections),
         ("特定のクラス要素", scrape_white_sections),
         ("テキスト装飾要素", scrape_decorative),
-        ("引用要素", scrape_quotes),
-        ("フッター情報", scrape_footer),
     ]
     print("BeautifulSoupスクレイピング練習")
     print("対象: 基本ページ (/basic)")
