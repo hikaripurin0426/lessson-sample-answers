@@ -1,0 +1,7 @@
+text,href,target,is_external,is_email
+← ホームに戻る,/,,False,False
+ページ内リンク（ページトップへ）,#main-title,,False,False
+内部リンク（テーブルページ）,/table,,False,False
+外部リンク（Python公式ドキュメント）,https://docs.python.org/ja/3/,_blank,True,False
+メールリンク,mailto:example@example.com,,False,True
+robots.txt,/robots.txt,_blank,False,False
